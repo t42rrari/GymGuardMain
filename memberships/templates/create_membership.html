@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Membership - GymGuard</title>
+</head>
+<body>
+    <h1>Create Membership</h1>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Select Member:</label>
+        <select name="member" required>
+            <option value="">Choose a member</option>
+            {% for member in members %}
+                <option value="{{ member.id }}">
+                    {{ member.username }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label>Membership Plan:</label>
+        <input type="text" name="plan" maxlength="30" required>
+
+        <br><br>
+
+        <label>Start Date:</label>
+        <input type="date" name="start_date" required>
+
+        <br><br>
+
+        <label>End Date:</label>
+        <input type="date" name="end_date" required>
+
+        <br><br>
+
+        <button type="submit">Create Membership</button>
+    </form>
+
+    <br>
+    <a href="{% url 'view_membership' %}">Back to Memberships</a>
+</body>
+</html>

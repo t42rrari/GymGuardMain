@@ -6,6 +6,11 @@
 <body>
     <h2>GymGuard Memberships</h2>
 
+    {% if request.user.profile.role == 'admin' or request.user.profile.role == 'receptionist' %}
+        <a href="{% url 'create_membership' %}">Create New Membership</a>
+        <br><br>
+    {% endif %}
+
     {% for membership in memberships %}
         <p>Member: {{ membership.member.username }}</p>
         <p>Plan: {{ membership.plan }}</p>
