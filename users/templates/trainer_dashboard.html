@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainer Dashboard</title>
+</head>
+<body>
+    <h2>GymGuard Trainer Dashboard</h2>
+    <p>Welcome, Trainer!</p>
+
+    <h3>Trainer Features</h3>
+    <ul>
+        <li>View Assigned Members</li>
+        <li>View Training Sessions</li>
+    </ul>
+
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

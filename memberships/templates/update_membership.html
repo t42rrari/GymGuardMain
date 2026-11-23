@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Membership</title>
+</head>
+<body>
+    <h2>Update Membership</h2>
+
+    <p>Member: {{ membership.member.username }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <p>Plan:</p>
+        <input type="text" name="plan" maxlength="30" value="{{ membership.plan }}" required>
+
+        <p>Active:</p>
+        <input type="checkbox" name="active" {% if membership.active %}checked{% endif %}>
+
+        <br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+
+    <p><a href="{% url 'view_membership' %}">Back to Memberships</a></p>
+</body>
+</html>

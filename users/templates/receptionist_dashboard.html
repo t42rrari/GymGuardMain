@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receptionist Dashboard</title>
+</head>
+<body>
+    <h2>GymGuard Receptionist Dashboard</h2>
+    <p>Welcome, Receptionist!</p>
+
+    <h3>Receptionist Features</h3>
+    <ul>
+        <li><a href="{% url 'view_membership' %}">View Members</a></li>
+        <li>Manage Bookings</li>
+        <li>Update Memberships</li>
+    </ul>
+
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

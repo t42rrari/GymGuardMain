@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GymGuard Memberships</title>
+</head>
+<body>
+    <h2>GymGuard Memberships</h2>
+
+    {% for membership in memberships %}
+        <p>Member: {{ membership.member.username }}</p>
+        <p>Plan: {{ membership.plan }}</p>
+        <p>Start Date: {{ membership.start_date }}</p>
+        <p>End Date: {{ membership.end_date }}</p>
+        <p>Active: {{ membership.active }}</p>
+
+        {% if request.user.profile.role == 'admin' or request.user.profile.role == 'receptionist' %}
+            <a href="{% url 'update_membership' membership.id %}">Edit Membership</a>
+        {% endif %}
+
+        <hr>
+    {% empty %}
+        <p>No memberships found.</p>
+    {% endfor %}
+
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</body>
+</html>
