@@ -54,6 +54,11 @@ def update_membership(request, membership_id):
     )
 
     if request.method == 'POST':
+
+        if request.POST.get('action') == 'delete':
+            membership.member.delete()
+            return redirect('view_membership')
+
         plan = request.POST.get('plan', '').strip()
         trainer_id = request.POST.get('trainer', '')
 
@@ -104,24 +109,39 @@ def create_membership(request):
         member_id = request.POST.get('member')
         trainer_id = request.POST.get('trainer', '')
         plan = request.POST.get('plan', '').strip()
-        start_date = request.POST.get('start_date')
-        end_date = request.POST.get('end_date')
+        start_date = request.POST.get('start_date', '')
+        end_date = request.POST.get('end_date', '')
 
-        if not member_id or not plan or not start_date or not end_date:
+        if not all([first_name, last_name, email, password, plan,
+                    start_date, end_date]):
             return render(request, 'create_membership.html', {
                 'members': members,
                 'trainers': trainers,
                 'error': 'Please fill in all required fields.'
             })
 
-        if len(plan) > 30 or end_date < start_date:
+        if (len(first_name) > 150 or len(last_name) > 150
+                or len(email) > 150 or len(plan) > 30):
+            return render(request, 'create_membership.html', {
+                'error': 'One of the fields is too long.'
+            })
+
+        if '@' not in email:
             return render(request, 'create_membership.html', {
                 'members': members,
                 'trainers': trainers,
                 'error': 'Enter a valid plan and date range.'
             })
 
-        member = get_object_or_404(members, id=member_id)
+        if len(password) < 8:
+            return render(request, 'create_membership.html', {
+                'error': 'Password must be at least 8 characters.'
+            })
+
+        if end_date < start_date:
+            return render(request, 'create_membership.html', {
+                'error': 'End date cannot be before start date.'
+            })
 
         trainer = None
 

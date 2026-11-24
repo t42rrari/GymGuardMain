@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Users</title>
+</head>
+<body>
+    <h1>Manage Users</h1>
+
+    <form method="GET">
+        <input type="text" name="search" placeholder="Search by email" value="{{ search }}">
+        <button type="submit">Search</button>
+        <a href="{% url 'manage_users' %}">Clear</a>
+    </form>
+
+    <br>
+
+    {% for user in users %}
+        <p>Name: {{ user.get_full_name|default:user.username }}</p>
+        <p>Email: {{ user.email|default:"Not provided" }}</p>
+        <p>Role: {{ user.profile.get_role_display|default:"Not assigned" }}</p>
+
+        {% if user != request.user and not user.is_superuser %}
+            <form method="POST"
+                  action="{% url 'delete_user' user.id %}"
+                  onsubmit="return confirm('Are you sure you want to delete this user?');">
+
+                {% csrf_token %}
+                <button type="submit">Delete User</button>
+            </form>
+        {% endif %}
+
+        <hr>
+    {% empty %}
+        <p>No users found.</p>
+    {% endfor %}
+
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</body>
+</html>
