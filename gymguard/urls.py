@@ -28,6 +28,15 @@ urlpatterns = [
         name='assigned_members'
     ),
 
+    # Member management
+    path('members/', views.member_list, name='member_list'),
+    path('members/create/', views.create_member, name='create_member'),
+    path(
+        'members/toggle/<int:member_id>/',
+        views.toggle_member,
+        name='toggle_member'
+    ),
+
     # Audit logs
     path('audit-logs/', views.audit_logs, name='audit_logs'),
 

@@ -17,6 +17,13 @@
     </div>
 
     <div class="dashboard-card">
+        <h3>Member Management</h3>
+        <p>Register new members and manage their accounts.</p>
+        <a class="button" href="{% url 'member_list' %}">Manage Members</a>
+        <a class="button secondary" href="{% url 'create_member' %}">Add Member</a>
+    </div>
+
+    <div class="dashboard-card">
         <h3>Trainer Management</h3>
         <p>View trainers and manage their active status.</p>
         <a class="button" href="{% url 'trainer_list' %}">Manage Trainers</a>

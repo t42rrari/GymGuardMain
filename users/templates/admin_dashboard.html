@@ -17,6 +17,13 @@
     </div>
 
     <div class="dashboard-card">
+        <h3>Member Management</h3>
+        <p>Create member accounts and manage their status.</p>
+        <a class="button" href="{% url 'member_list' %}">Manage Members</a>
+        <a class="button secondary" href="{% url 'create_member' %}">Add Member</a>
+    </div>
+
+    <div class="dashboard-card">
         <h3>Memberships</h3>
         <p>View and manage member subscriptions.</p>
         <a class="button" href="{% url 'view_membership' %}">View Memberships</a>

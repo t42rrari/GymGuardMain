@@ -213,6 +213,109 @@ def toggle_trainer(request, trainer_id):
 
 
 @login_required
+def member_list(request):
+    if not has_role(request.user, ['admin', 'receptionist']):
+        return HttpResponseForbidden("Access Denied")
+
+    members = User.objects.filter(
+        profile__role='member'
+    ).select_related('profile', 'membership')
+
+    return render(request, 'member_list.html', {
+        'members': members
+    })
+
+
+@login_required
+def create_member(request):
+    if not has_role(request.user, ['admin', 'receptionist']):
+        return HttpResponseForbidden("Access Denied")
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        phone = request.POST.get('phone', '').strip()
+
+        if not username or not email or not password:
+            return render(request, 'create_member.html', {
+                'error': 'Please fill in all required fields.'
+            })
+
+        if User.objects.filter(username=username).exists():
+            return render(request, 'create_member.html', {
+                'error': 'Username already exists.'
+            })
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'create_member.html', {
+                'error': 'Email already exists.'
+            })
+
+        if len(phone) > 20:
+            return render(request, 'create_member.html', {
+                'error': 'Phone number is too long.'
+            })
+
+        try:
+            validate_password(password)
+        except ValidationError as error:
+            return render(request, 'create_member.html', {
+                'error': ' '.join(error.messages)
+            })
+
+        member = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        Profile.objects.create(
+            user=member,
+            role='member',
+            phone=phone
+        )
+
+        log_action(
+            request,
+            'MEMBER_CREATED',
+            f'Member account created: {username}'
+        )
+
+        messages.success(request, 'Member created successfully.')
+
+        return redirect('member_list')
+
+    return render(request, 'create_member.html')
+
+
+@login_required
+@require_POST
+def toggle_member(request, member_id):
+    if not has_role(request.user, ['admin', 'receptionist']):
+        return HttpResponseForbidden("Access Denied")
+
+    member = get_object_or_404(
+        User,
+        id=member_id,
+        profile__role='member'
+    )
+
+    member.profile.active = not member.profile.active
+    member.profile.save()
+
+    action = 'MEMBER_ACTIVATED' if member.profile.active else 'MEMBER_DEACTIVATED'
+
+    log_action(
+        request,
+        action,
+        f'Member: {member.username}'
+    )
+
+    return redirect('member_list')
+
+
+@login_required
 def audit_logs(request):
     if not has_role(request.user, ['admin']):
         return HttpResponseForbidden("Access Denied")

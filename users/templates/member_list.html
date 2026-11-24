@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Member Management | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Member Management</h1>
+    <p>View members and manage their accounts.</p>
+    <a class="button" href="{% url 'create_member' %}">Add Member</a>
+</section>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Membership</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+            <tr>
+                <td>{{ member.username }}</td>
+                <td>{{ member.email|default:'-' }}</td>
+                <td>{{ member.profile.phone|default:'-' }}</td>
+                <td>
+                    {% if member.membership %}
+                        {{ member.membership.plan }}
+                    {% else %}
+                        <a href="{% url 'create_membership' %}">Create membership</a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if member.profile.active %}
+                        <span class="status active">Active</span>
+                    {% else %}
+                        <span class="status inactive">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{% url 'toggle_member' member.id %}" class="inline-form">
+                        {% csrf_token %}
+                        <button class="button small" type="submit">
+                            {% if member.profile.active %}Deactivate{% else %}Activate{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No members have been added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
