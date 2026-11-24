@@ -1,36 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Membership</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Create Membership | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
     <h1>Create Membership</h1>
+    <p>Create a membership and optionally assign a trainer.</p>
+</section>
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+{% if error %}
+    <div class="alert error">{{ error }}</div>
+{% endif %}
 
-    <form method="POST">
-        {% csrf_token %}
+<form method="POST" class="content-form">
+    {% csrf_token %}
 
-        <p>First Name: <input type="text" name="first_name" required></p>
+    <label for="member">Member</label>
+    <select id="member" name="member" required>
+        <option value="">Choose a member</option>
+        {% for member in members %}
+            <option value="{{ member.id }}">{{ member.username }}</option>
+        {% endfor %}
+    </select>
 
-        <p>Last Name: <input type="text" name="last_name" required></p>
+    <label for="trainer">Assign Trainer</label>
+    <select id="trainer" name="trainer">
+        <option value="">No trainer assigned</option>
+        {% for trainer in trainers %}
+            <option value="{{ trainer.id }}">{{ trainer.username }}</option>
+        {% endfor %}
+    </select>
 
-        <p>Email: <input type="email" name="email" required></p>
+    <label for="plan">Membership Plan</label>
+    <input id="plan" type="text" name="plan" maxlength="30" required>
 
-        <p>Password: <input type="password" name="password" required></p>
+    <label for="start_date">Start Date</label>
+    <input id="start_date" type="date" name="start_date" required>
 
-        <p>Membership Plan: <input type="text" name="plan" maxlength="30" required></p>
+    <label for="end_date">End Date</label>
+    <input id="end_date" type="date" name="end_date" required>
 
-        <p>Start Date: <input type="date" name="start_date" required></p>
-
-        <p>End Date: <input type="date" name="end_date" required></p>
-
-        <button type="submit">Create Membership</button>
-    </form>
-
-    <br>
-    <a href="{% url 'view_membership' %}">Back to Memberships</a>
-</body>
-</html>
+    <button class="button" type="submit">Create Membership</button>
+    <a class="button secondary" href="{% url 'view_membership' %}">Cancel</a>
+</form>
+{% endblock %}

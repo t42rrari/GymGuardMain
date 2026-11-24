@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Member | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Add Member</h1>
+    <p>Create a member account for GymGuard.</p>
+</section>
+
+{% if error %}
+    <div class="alert error">{{ error }}</div>
+{% endif %}
+
+<form method="POST" class="content-form">
+    {% csrf_token %}
+
+    <label for="username">Username</label>
+    <input id="username" name="username" maxlength="150" required>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" required>
+
+    <label for="password">Temporary Password</label>
+    <input id="password" type="password" name="password" minlength="8" required>
+
+    <label for="phone">Phone</label>
+    <input id="phone" name="phone" maxlength="20">
+
+    <button class="button" type="submit">Create Member</button>
+    <a class="button secondary" href="{% url 'member_list' %}">Cancel</a>
+</form>
+{% endblock %}

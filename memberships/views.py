@@ -1,14 +1,28 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
-from django.db import transaction
-from users.models import Profile
+from django.views.decorators.http import require_POST
+
 from .models import Membership
+from users.audit import log_action
+
+
+def has_role(user, roles):
+    return (
+        hasattr(user, 'profile')
+        and user.profile.active
+        and user.profile.role in roles
+    )
+
 
 @login_required
 def view_membership(request):
-    if not hasattr(request.user, 'profile'):
+    if not has_role(
+        request.user,
+        ['member', 'trainer', 'receptionist', 'admin']
+    ):
         return HttpResponseForbidden("Access Denied")
 
     role = request.user.profile.role
@@ -16,29 +30,28 @@ def view_membership(request):
     if role == 'member':
         memberships = Membership.objects.filter(member=request.user)
 
-    elif role == 'receptionist' or role == 'admin':
-        memberships = Membership.objects.all()
+    elif role == 'trainer':
+        memberships = Membership.objects.filter(trainer=request.user)
 
     else:
-        return HttpResponseForbidden("Access Denied")
+        memberships = Membership.objects.all()
 
     return render(request, 'membership_list.html', {
-        'memberships': memberships
+        'memberships': memberships.select_related('member', 'trainer')
     })
-
 
 
 @login_required
 def update_membership(request, membership_id):
-    if not hasattr(request.user, 'profile'):
-        return HttpResponseForbidden("Access Denied")
-
-    role = request.user.profile.role
-
-    if role != 'admin' and role != 'receptionist':
+    if not has_role(request.user, ['admin', 'receptionist']):
         return HttpResponseForbidden("Access Denied")
 
     membership = get_object_or_404(Membership, id=membership_id)
+
+    trainers = User.objects.filter(
+        profile__role='trainer',
+        profile__active=True
+    )
 
     if request.method == 'POST':
 
@@ -47,48 +60,54 @@ def update_membership(request, membership_id):
             return redirect('view_membership')
 
         plan = request.POST.get('plan', '').strip()
-        start_date = request.POST.get('start_date')
-        end_date = request.POST.get('end_date')
+        trainer_id = request.POST.get('trainer', '')
 
         if not plan or len(plan) > 30:
             return render(request, 'update_membership.html', {
                 'membership': membership,
-                'error': 'Enter a valid membership plan.'
+                'trainers': trainers,
+                'error': 'Enter a plan name between 1 and 30 characters.'
             })
 
-        if not start_date or not end_date or end_date < start_date:
-            return render(request, 'update_membership.html', {
-                'membership': membership,
-                'error': 'Enter valid start and end dates.'
-            })
+        trainer = None
+
+        if trainer_id:
+            trainer = get_object_or_404(trainers, id=trainer_id)
 
         membership.plan = plan
-        membership.start_date = start_date
-        membership.end_date = end_date
+        membership.trainer = trainer
         membership.active = request.POST.get('active') == 'on'
         membership.save()
+
+        log_action(
+            request,
+            'MEMBERSHIP_UPDATED',
+            f'Membership updated for {membership.member.username}'
+        )
 
         return redirect('view_membership')
 
     return render(request, 'update_membership.html', {
-        'membership': membership
+        'membership': membership,
+        'trainers': trainers
     })
+
 
 @login_required
 def create_membership(request):
-    if not hasattr(request.user, 'profile'):
+    if not has_role(request.user, ['admin', 'receptionist']):
         return HttpResponseForbidden("Access Denied")
 
-    role = request.user.profile.role
+    members = User.objects.filter(profile__role='member')
 
-    if role != 'admin' and role != 'receptionist':
-        return HttpResponseForbidden("Access Denied")
+    trainers = User.objects.filter(
+        profile__role='trainer',
+        profile__active=True
+    )
 
     if request.method == 'POST':
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
-        email = request.POST.get('email', '').strip().lower()
-        password = request.POST.get('password', '')
+        member_id = request.POST.get('member')
+        trainer_id = request.POST.get('trainer', '')
         plan = request.POST.get('plan', '').strip()
         start_date = request.POST.get('start_date', '')
         end_date = request.POST.get('end_date', '')
@@ -96,7 +115,9 @@ def create_membership(request):
         if not all([first_name, last_name, email, password, plan,
                     start_date, end_date]):
             return render(request, 'create_membership.html', {
-                'error': 'Please fill in all fields.'
+                'members': members,
+                'trainers': trainers,
+                'error': 'Please fill in all required fields.'
             })
 
         if (len(first_name) > 150 or len(last_name) > 150
@@ -107,7 +128,9 @@ def create_membership(request):
 
         if '@' not in email:
             return render(request, 'create_membership.html', {
-                'error': 'Enter a valid email.'
+                'members': members,
+                'trainers': trainers,
+                'error': 'Enter a valid plan and date range.'
             })
 
         if len(password) < 8:
@@ -120,33 +143,36 @@ def create_membership(request):
                 'error': 'End date cannot be before start date.'
             })
 
-        if User.objects.filter(username__iexact=email).exists() or User.objects.filter(email__iexact=email).exists():
+        trainer = None
+
+        if trainer_id:
+            trainer = get_object_or_404(trainers, id=trainer_id)
+
+        if Membership.objects.filter(member=member).exists():
             return render(request, 'create_membership.html', {
-                'error': 'This email is already registered.'
+                'members': members,
+                'trainers': trainers,
+                'error': 'This member already has a membership.'
             })
 
-        with transaction.atomic():
-            member = User.objects.create_user(
-                username=email,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                password=password
-            )
+        membership = Membership.objects.create(
+            member=member,
+            trainer=trainer,
+            plan=plan,
+            start_date=start_date,
+            end_date=end_date,
+            active=True
+        )
 
-            Profile.objects.create(
-                user=member,
-                role='member'
-            )
-
-            Membership.objects.create(
-                member=member,
-                plan=plan,
-                start_date=start_date,
-                end_date=end_date,
-                active=True
-            )
+        log_action(
+            request,
+            'MEMBERSHIP_CREATED',
+            f'Membership created for {member.username}'
+        )
 
         return redirect('view_membership')
 
-    return render(request, 'create_membership.html')
+    return render(request, 'create_membership.html', {
+        'members': members,
+        'trainers': trainers
+    })

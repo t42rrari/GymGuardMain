@@ -1,21 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Trainer Dashboard</title>
-</head>
-<body>
-    <h2>GymGuard Trainer Dashboard</h2>
-    <p>Welcome, Trainer!</p>
+{% extends 'base.html' %}
 
-    <h3>Trainer Features</h3>
-    <ul>
-        <li>View Assigned Members</li>
-        <li>View Training Sessions</li>
-    </ul>
+{% block title %}Trainer Dashboard | GymGuard{% endblock %}
 
-    <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-</body>
-</html>
+{% block content %}
+<section class="page-header">
+    <h1>Welcome, {{ request.user.username }}</h1>
+    <p>View the members assigned to you.</p>
+</section>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <h3>Assigned Members</h3>
+        <p>View members currently assigned to your trainer account.</p>
+        <a class="button" href="{% url 'view_membership' %}">View Assigned Members</a>
+    </div>
+</div>
+{% endblock %}

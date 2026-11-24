@@ -1,23 +1,32 @@
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Receptionist Dashboard</title>
-</head>
-<body>
-    <h2>GymGuard Receptionist Dashboard</h2>
-    <p>Welcome, Receptionist!</p>
+{% block title %}Receptionist Dashboard | GymGuard{% endblock %}
 
-    <h3>Receptionist Features</h3>
-    <ul>
-        <li><a href="{% url 'view_membership' %}">View Members</a></li>
-        <li>Manage Bookings</li>
-        <li>Update Memberships</li>
-    </ul>
+{% block content %}
+<section class="page-header">
+    <h1>Receptionist Dashboard</h1>
+    <p>Manage memberships and assist gym members.</p>
+</section>
 
-    <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-</body>
-</html>
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <h3>Membership Management</h3>
+        <p>View existing memberships and update their details.</p>
+        <a class="button" href="{% url 'view_membership' %}">View Memberships</a>
+        <a class="button secondary" href="{% url 'create_membership' %}">Create Membership</a>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Member Management</h3>
+        <p>Register new members and manage their accounts.</p>
+        <a class="button" href="{% url 'member_list' %}">Manage Members</a>
+        <a class="button secondary" href="{% url 'create_member' %}">Add Member</a>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Trainer Management</h3>
+        <p>View trainers and manage their active status.</p>
+        <a class="button" href="{% url 'trainer_list' %}">Manage Trainers</a>
+    </div>
+</div>
+{% endblock %}

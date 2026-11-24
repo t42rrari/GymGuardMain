@@ -1,49 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Update Membership</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Update Membership | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
     <h1>Update Membership</h1>
+    <p>Member: {{ membership.member.username }}</p>
+</section>
 
-    <p>Member: {{ membership.member.get_full_name|default:membership.member.username }}</p>
-    <p>Email: {{ membership.member.email|default:"Not provided" }}</p>
+{% if error %}
+    <div class="alert error">{{ error }}</div>
+{% endif %}
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+<form method="POST" class="content-form">
+    {% csrf_token %}
 
-    <form method="POST">
-        {% csrf_token %}
+    <label for="plan">Membership Plan</label>
+    <input id="plan" type="text" name="plan"
+           maxlength="30" value="{{ membership.plan }}" required>
 
-        <p>Plan:</p>
-        <input type="text" name="plan" value="{{ membership.plan }}" maxlength="30" required>
+    <label for="trainer">Assigned Trainer</label>
+    <select id="trainer" name="trainer">
+        <option value="">No trainer assigned</option>
+        {% for trainer in trainers %}
+            <option value="{{ trainer.id }}"
+                {% if membership.trainer_id == trainer.id %}selected{% endif %}>
+                {{ trainer.username }}
+            </option>
+        {% endfor %}
+    </select>
 
-        <p>Start Date:</p>
-        <input type="date" name="start_date" value="{{ membership.start_date|date:'Y-m-d' }}" required>
+    <label for="start_date">Start Date</label>
+    <input id="start_date" type="date" name="start_date"
+           value="{{ membership.start_date|date:'Y-m-d' }}" required>
 
-        <p>End Date:</p>
-        <input type="date" name="end_date" value="{{ membership.end_date|date:'Y-m-d' }}" required>
+    <label for="end_date">End Date</label>
+    <input id="end_date" type="date" name="end_date"
+           value="{{ membership.end_date|date:'Y-m-d' }}" required>
 
-        <p>Active:</p>
-        <input type="checkbox" name="active" {% if membership.active %}checked{% endif %}>
+    <label>
+        <input type="checkbox" name="active"
+               {% if membership.active %}checked{% endif %}>
+        Membership Active
+    </label>
 
-        <br><br>
-
-        <button type="submit">Save Changes</button>
-    </form>
-
-    <hr>
-
-    <form method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this member and their account?');">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="delete">
-
-        <button type="submit" style="color: red;">Delete Member</button>
-    </form>
-
-    <br>
-
-    <a href="{% url 'view_membership' %}">Back to Memberships</a>
-</body>
-</html>
+    <button class="button" type="submit">Save Changes</button>
+    <a class="button secondary" href="{% url 'view_membership' %}">Cancel</a>
+</form>
+{% endblock %}
