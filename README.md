@@ -48,7 +48,7 @@ http://127.0.0.1:8000/login/
 
 Notes
 
-The database file isn't included in the repository, so you'll need to run migrations to create your local database.
+You'll need to run migrations to create your local database.
 
 You can create test users and assign roles through Django Admin.
 
