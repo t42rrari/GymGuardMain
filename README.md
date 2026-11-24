@@ -32,12 +32,6 @@ for /f "delims=" %i in ('python -c "from django.core.management.utils import get
 
 python manage.py migrate
 
-6. Create an admin account
-
-python manage.py createsuperuser
-
-After creating the superuser, go to http://127.0.0.1:8000/admin/ once the server is running and create a Profile for that account with the Admin role.
-
 7. Run the server
 
 python manage.py runserver
