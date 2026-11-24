@@ -1,31 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Update Membership</title>
-</head>
-<body>
-    <h2>Update Membership</h2>
+{% extends 'base.html' %}
 
+{% block title %}Update Membership | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Update Membership</h1>
     <p>Member: {{ membership.member.username }}</p>
+</section>
 
-    <form method="POST">
-        {% csrf_token %}
+{% if error %}
+    <div class="alert error">{{ error }}</div>
+{% endif %}
 
-        <p>Plan:</p>
-        <input type="text" name="plan" maxlength="30" value="{{ membership.plan }}" required>
+<form method="POST" class="content-form">
+    {% csrf_token %}
 
-        <p>Active:</p>
-        <input type="checkbox" name="active" {% if membership.active %}checked{% endif %}>
+    <label for="plan">Membership Plan</label>
+    <input id="plan" type="text" name="plan"
+           maxlength="30" value="{{ membership.plan }}" required>
 
-        <br><br>
+    <label for="trainer">Assigned Trainer</label>
+    <select id="trainer" name="trainer">
+        <option value="">No trainer assigned</option>
+        {% for trainer in trainers %}
+            <option value="{{ trainer.id }}"
+                {% if membership.trainer_id == trainer.id %}selected{% endif %}>
+                {{ trainer.username }}
+            </option>
+        {% endfor %}
+    </select>
 
-        <button type="submit">Save Changes</button>
-    </form>
+    <label for="start_date">Start Date</label>
+    <input id="start_date" type="date" name="start_date"
+           value="{{ membership.start_date|date:'Y-m-d' }}" required>
 
-    {% if error %}
-        <p>{{ error }}</p>
-    {% endif %}
+    <label for="end_date">End Date</label>
+    <input id="end_date" type="date" name="end_date"
+           value="{{ membership.end_date|date:'Y-m-d' }}" required>
 
-    <p><a href="{% url 'view_membership' %}">Back to Memberships</a></p>
-</body>
-</html>
+    <label>
+        <input type="checkbox" name="active"
+               {% if membership.active %}checked{% endif %}>
+        Membership Active
+    </label>
+
+    <button class="button" type="submit">Save Changes</button>
+    <a class="button secondary" href="{% url 'view_membership' %}">Cancel</a>
+</form>
+{% endblock %}

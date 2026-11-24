@@ -1,23 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title>
-</head>
-<body>
-    <h2>GymGuard Admin Dashboard</h2>
-    <p>Welcome, Admin!</p>
+{% extends 'base.html' %}
 
-    <h3>Admin Features</h3>
-    <ul>
-        <li>Manage Users</li>
-        <li><a href="{% url 'view_membership' %}">View Memberships</a></li>
-        <li>Manage Bookings</li>
-        <li>View Audit Logs</li>
-    </ul>
+{% block title %}Admin Dashboard | GymGuard{% endblock %}
 
-    <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-</body>
-</html>
+{% block content %}
+<section class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Manage GymGuard users, trainers, memberships and system activity.</p>
+</section>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <h3>Trainer Management</h3>
+        <p>Create trainer accounts and manage their status.</p>
+        <a class="button" href="{% url 'trainer_list' %}">Manage Trainers</a>
+        <a class="button secondary" href="{% url 'create_trainer' %}">Add Trainer</a>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Memberships</h3>
+        <p>View and manage member subscriptions.</p>
+        <a class="button" href="{% url 'view_membership' %}">View Memberships</a>
+        <a class="button secondary" href="{% url 'create_membership' %}">Create Membership</a>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>User Administration</h3>
+        <p>Manage user accounts through Django administration.</p>
+        <a class="button" href="{% url 'admin:index' %}">Open Admin Panel</a>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Audit Logs</h3>
+        <p>Review recorded actions and account activity.</p>
+        <a class="button" href="{% url 'audit_logs' %}">View Audit Logs</a>
+    </div>
+</div>
+{% endblock %}

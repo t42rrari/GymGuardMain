@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Logs | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Audit Logs</h1>
+    <p>Review the latest 250 recorded system events.</p>
+</section>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date and Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Details</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.created_at|date:'Y-m-d H:i:s' }}</td>
+                <td>{{ log.actor.username|default:'System / deleted user' }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.details }}</td>
+                <td>{{ log.ip_address|default:'-' }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No audit events have been recorded.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Trainer Management | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Trainer Management</h1>
+    <p>View trainers and manage their accounts.</p>
+    <a class="button" href="{% url 'create_trainer' %}">Add Trainer</a>
+</section>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Specialty</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trainer in trainers %}
+            <tr>
+                <td>{{ trainer.username }}</td>
+                <td>{{ trainer.email|default:'-' }}</td>
+                <td>{{ trainer.profile.specialty|default:'-' }}</td>
+                <td>{{ trainer.profile.phone|default:'-' }}</td>
+                <td>
+                    {% if trainer.is_active %}
+                        <span class="status active">Active</span>
+                    {% else %}
+                        <span class="status inactive">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{% url 'toggle_trainer' trainer.id %}" class="inline-form">
+                        {% csrf_token %}
+                        <button class="button small" type="submit">
+                            {% if trainer.is_active %}Deactivate{% else %}Activate{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No trainers have been added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

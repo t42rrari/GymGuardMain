@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Trainer | GymGuard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Add Trainer</h1>
+    <p>Create a trainer account for GymGuard.</p>
+</section>
+
+{% if error %}
+    <div class="alert error">{{ error }}</div>
+{% endif %}
+
+<form method="POST" class="content-form">
+    {% csrf_token %}
+
+    <label for="username">Username</label>
+    <input id="username" name="username" maxlength="150" required>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email">
+
+    <label for="password">Temporary Password</label>
+    <input id="password" type="password" name="password" minlength="8" required>
+
+    <label for="specialty">Specialty</label>
+    <input id="specialty" name="specialty" maxlength="100"
+           placeholder="e.g. Strength training">
+
+    <label for="phone">Phone</label>
+    <input id="phone" name="phone" maxlength="25">
+
+    <button class="button" type="submit">Create Trainer</button>
+    <a class="button secondary" href="{% url 'trainer_list' %}">Cancel</a>
+</form>
+{% endblock %}
